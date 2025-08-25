@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import gensim
 import numpy as np
-from proto import TrainReq, GenVecReq, GenVecResp
+from proto import TrainReq, GenVecReq, GenVecResp, SimilarityReq, SimilarityResp
 import uvicorn
 
 app = FastAPI()
@@ -31,13 +31,7 @@ def health():
 def train(req: TrainReq):
     global word2vec_model
     
-    # 将输入数据转换为gensim需要的格式（每个文档是单词列表）
-    sentences = []
-    for text in req.data:
-        # 简单的分词，可以根据需要改进
-        words = text.lower().split()
-        if words:  # 确保不是空列表
-            sentences.append(words)
+    sentences = req.data
     
     if word2vec_model is None:
         # 第一次训练，创建新模型
@@ -76,7 +70,7 @@ def gen_vec(req: GenVecReq):
     if word2vec_model is None:
         return {"error": "Model not trained yet. Please train the model first."}
     
-    item = req.item.lower()
+    item = req.item
     
     try:
         # 获取item的向量
@@ -85,6 +79,23 @@ def gen_vec(req: GenVecReq):
     except KeyError:
         # 如果item不在词汇表中，返回零向量或随机向量
         return GenVecResp(vec=np.zeros(100).tolist())
+    
+@app.post("/similarity")
+def similarity(req: SimilarityReq):
+    global word2vec_model
+    
+    if word2vec_model is None:
+        return {"error": "Model not trained yet. Please train the model first."}
+    
+    item1 = req.item1
+    item2 = req.item2
+    
+    try:
+        # 计算两个item的余弦相似度
+        similarity = word2vec_model.wv.similarity(item1, item2)
+        return SimilarityResp(similarity=similarity)
+    except KeyError:
+        return {"error": "One or both items not found in vocabulary."}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
