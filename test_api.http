@@ -1,0 +1,102 @@
+### Item2Vec API 测试请求
+
+# 基础URL
+@baseUrl = http://localhost:8000
+
+### 1. 健康检查
+GET {{baseUrl}}/health
+Content-Type: application/json
+
+###
+
+### 2. 第一次训练模型
+POST {{baseUrl}}/train
+Content-Type: application/json
+
+{
+    "data": [
+        "apple orange banana",
+        "apple computer laptop", 
+        "orange juice drink",
+        "banana fruit healthy",
+        "computer technology modern"
+    ]
+}
+
+###
+
+### 3. 第二次训练（渐进训练）
+POST {{baseUrl}}/train
+Content-Type: application/json
+
+{
+    "data": [
+        "laptop portable computer",
+        "juice beverage liquid",
+        "drink beverage refreshment", 
+        "fruit healthy nutrition",
+        "technology modern innovation",
+        "new item smartphone",
+        "smartphone mobile device"
+    ]
+}
+
+###
+
+### 4. 生成向量 - 已知词汇
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "apple"
+}
+
+###
+
+### 5. 生成向量 - 新增词汇
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "smartphone"
+}
+
+###
+
+### 6. 生成向量 - 未知词汇
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "unknown_word"
+}
+
+###
+
+### 7. 生成向量 - 多个测试
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "computer"
+}
+
+###
+
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "technology"
+}
+
+###
+
+POST {{baseUrl}}/gen_vec
+Content-Type: application/json
+
+{
+    "item": "juice"
+}
+
+###
